@@ -13,11 +13,8 @@ namespace HomeSensors.Functions
 {
     public class DataInboundFunction
     {
-        private readonly IMeasurementStore store;
-
-        public DataInboundFunction(IMeasurementStore store)
+        public DataInboundFunction()
         {
-            this.store = store;
         }
 
         [FunctionName("data")]
