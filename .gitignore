@@ -235,4 +235,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
-HomeSensors.Devices/configuration.h
+home-sensors-devices/configuration.h
+*.bak

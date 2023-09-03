@@ -1,3 +1,5 @@
+// #define DEBUG
+
 #include "DHT.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
@@ -10,26 +12,17 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-const char* ssid =  WIFI_SSID;
-const char* password = WIFI_PASSWORD;
-const char* endpoint = ENDPOINT;
-
-const char* sensorId = "aiow1";
-const float maxVolt = 5.15; // 220k resistor results in 5.15V max
-const float voltOffset = 0.0;
-const float temperatureOffset = 0.0;
-const float humidityOffset = 0.0;
-
 void setup() {
   Serial.begin(115200);
   
-Serial.println("Processing start.");
+  logIfDebug("Processing start.");
+
   configureIO();
   initWifiConnection();
   String json = buildJsonPayload();
   sendData(json, 30000, 30000);
 
-Serial.println("Going to sleep.");
+  logIfDebug("Going to sleep.");
 
   ESP.deepSleep(600e6); // sleep 600s = 10min
 }
@@ -44,8 +37,8 @@ void configureIO() {
 }
 
 void initWifiConnection() {
-  if (WiFi.SSID() != ssid) {
-    WiFi.begin(ssid, password);
+  if (WiFi.SSID() != WIFI_SSID) {
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     WiFi.persistent(true);
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
@@ -53,14 +46,16 @@ void initWifiConnection() {
 }
 
 String buildJsonPayload() {
-  float humidity = dht.readHumidity() + humidityOffset;
-  float temperature = dht.readTemperature() + temperatureOffset;
+  logIfDebug("Reading sensor values ...");
+  float humidity = dht.readHumidity() + HUMIDITY_OFFSET;
+  float temperature = dht.readTemperature() + TEMPERATURE_OFFSET;
 
   unsigned int raw = analogRead(A0);
-  float volt = raw / 1023.0 * maxVolt + voltOffset;
+  float volt = raw / 1023.0 * MAX_VOLTAGE + VOLTAGE_OFFSET;
 
+  logIfDebug("Building json payload ...");
   JSONVar payload;
-  payload["sensorId"] = sensorId;
+  payload["sensorId"] = SENSOR_ID;
   payload["version"] = "1.0";
   payload["data"]["t"] = temperature;
   payload["data"]["h"] = humidity;
@@ -72,33 +67,42 @@ String buildJsonPayload() {
 void sendData(String json, int wifiTimeout, int httpTimeout) {
   bool isReady = waitUntilWifiIsReady(wifiTimeout);
   if (isReady) {
-    Serial.println("Sending data ...");
+    logIfDebug("Sending data ...");
     WiFiClient client;
     HTTPClient http;
     
-    http.begin(client, endpoint);
+    http.begin(client, ENDPOINT);
     http.setTimeout(httpTimeout);
     http.addHeader("Content-Type", "application/json");
 
     int responseCode = http.POST(json);
-    Serial.print("Sent data, response code was ");
-    Serial.print(responseCode);
+
+#ifdef DEBUG
+    Serial.print("Sent data. Status code: ");
+    Serial.println(responseCode);
+#endif
 
     http.end();
   }
 }
 
 bool waitUntilWifiIsReady(int timeout) {
-  const int waitTime = 1000;
+  const int waitTime = 2000;
   int i = 0;
   while (WiFi.status() != WL_CONNECTED && i < timeout)
   {
     delay(waitTime);
     i += waitTime;
-    Serial.println("Connecting to wifi ...");
+    logIfDebug("Connecting to wifi ...");
   }
 
-  Serial.println("Connected to wifi.");
+  logIfDebug("Connected to wifi.");
 
   return WiFi.status() == WL_CONNECTED;
+}
+
+void logIfDebug(char* message) {
+#ifdef DEBUG
+  Serial.println(message);
+#endif
 }
