@@ -23,9 +23,6 @@ namespace HomeSensors.Functions
             ILogger log)
         {
             log.LogInformation("Reiceived sensor values. {Data}", request.ToJson());
-
-            //await store.Persist(request.SensorId, request.ToDomain());
-
             return new OkResult();
         }
     }
