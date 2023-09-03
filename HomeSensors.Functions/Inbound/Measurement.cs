@@ -1,15 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace HomeSensors.Functions.Inbound;
 
 public record Measurement
 {
-    [JsonPropertyName("t")]
-    public required double Temperature { get; init; }
+    [JsonProperty("t", Required = Required.Always)]
+    public double Temperature { get; init; }
 
-    [JsonPropertyName("h")]
-    public required double Humidity { get; init; }
+    [JsonProperty("h", Required = Required.Always)]
+    public double Humidity { get; init; }
 
-    [JsonPropertyName("U")]
-    public required double Voltage { get; init; }
+    [JsonProperty("U", Required = Required.Always)]
+    public double Voltage { get; init; }
 }

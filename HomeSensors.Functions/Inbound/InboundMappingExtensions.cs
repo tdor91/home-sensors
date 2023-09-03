@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace HomeSensors.Functions.Inbound;
 
@@ -8,7 +9,7 @@ public static class InboundMappingExtensions
     {
         return new Domain.Measurement
         {
-            Timestamp = measurement.Timestamp,
+            Timestamp = measurement.Timestamp ?? DateTimeOffset.UtcNow,
             Temperature = measurement.Data.Temperature,
             Humidity = measurement.Data.Humidity,
             Voltage = measurement.Data.Voltage,

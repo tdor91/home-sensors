@@ -1,19 +1,19 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace HomeSensors.Functions.Inbound;
 
 public record MeasurementRequest
 {
-    [JsonPropertyName("sensorId")]
-    public required string SensorId { get; init; }
+    [JsonProperty("sensorId", Required = Required.Always)]
+    public string SensorId { get; init; }
     
-    [JsonPropertyName("version")]
-    public required string Version { get; init; }
+    [JsonProperty("version", Required = Required.Always)]
+    public string Version { get; init; }
     
-    [JsonPropertyName("timestamp")]
-    public required DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;
+    [JsonProperty("timestamp")]
+    public DateTimeOffset? Timestamp { get; init; }
     
-    [JsonPropertyName("data")]
-    public required Measurement Data { get; init; }
+    [JsonProperty("data", Required = Required.Always)]
+    public Measurement Data { get; init; }
 }
